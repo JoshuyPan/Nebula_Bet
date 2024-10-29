@@ -3,6 +3,7 @@ module nebula::nebula{
     use sui::table::{Self, Table};
     use sui::sui::{SUI};
     use sui::balance::{Self, Balance};
+    use sui::clock::{Clock};
 
     use nebula::user::{Self, User};
     use nebula::bet::{Self, Bet};
@@ -12,6 +13,8 @@ module nebula::nebula{
     const E_NOT_ENOUGH_SUI: u64 = 102;
     const E_ALREADY_GUESSED: u64 = 103;
     const E_BET_NOT_EXPIRED_YET: u64 = 105;
+    
+    // ========== CLOCK ==========
 
     // My Security Checker
     public struct NebulaPolice has key {
@@ -64,6 +67,7 @@ module nebula::nebula{
         police: &mut NebulaPolice, 
         amountSuiPerUser: u64, // You have to input how many SUI to partecipate (MIN is 1 SUI)
         timeExpiring: u64, // Provide the bet duration before the number is picked
+        clock: &Clock,
         ctx: &mut TxContext
         )
     {
@@ -77,7 +81,7 @@ module nebula::nebula{
         let balance_fee_to_take = user.split_balance(bet_fee);
         police.balance.join(balance_fee_to_take);
         // Then Create new BET
-        bet::create_bet(amountSuiPerUser, timeExpiring, ctx);
+        bet::create_bet(amountSuiPerUser, timeExpiring, clock, ctx);
     }
 
     public entry fun join_bet(
@@ -105,10 +109,11 @@ module nebula::nebula{
 
     public entry fun pick_winner(
         bet: &mut Bet,
+        clock: &Clock,
         ctx: &mut TxContext
     ){
         // First of all we check if the bet is expired or in course
-        let is_bet_expired = bet.check_bet_expired(ctx);
+        let is_bet_expired = bet.check_bet_expired(clock);
         if(is_bet_expired){
             // If so, we generate the casual number they should guess
             let number_to_guess = generate_random_number_in_range_ten(ctx);
@@ -134,12 +139,29 @@ module nebula::nebula{
             // Here is the "funny" part, if no one got the exact number, we revert and we add 15 min of waiting time,
             // so other users can join the bet again, and the funds grows and grows util someone guesses the right number.
             if (someone_got_the_exact_number == false){
-                bet.increase_timer_fifteen_min(ctx);
+                bet.increase_timer_fifteen_min(clock);
                 return
             }
         }else {
             abort(E_BET_NOT_EXPIRED_YET)
         }
+    }
+
+    // ========= OnlyAdmin FUNCTIONS ======
+    // only who have the NebulaAdmin Struct in the wallet can call this functions
+
+    /// Function to add another Admin 
+    public entry fun give_admin_capability(_: &NebulaAdmin, newAdmin: address, ctx: &mut TxContext){
+        transfer::transfer( NebulaAdmin{
+            id: object::new(ctx)
+        }, newAdmin)
+    }
+
+    public entry fun withdraw_nebula_funds(_: &NebulaAdmin, police: &mut NebulaPolice, ctx: &mut TxContext){
+        let sender = tx_context::sender(ctx);
+        let nebula_balance = police.balance.withdraw_all();
+        let into_sui = nebula_balance.into_coin(ctx);
+        transfer::public_transfer(into_sui, sender);
     }
 
 

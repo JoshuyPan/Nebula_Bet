@@ -3,6 +3,7 @@ module nebula::bet{
     use sui::sui::{SUI};
     use sui::balance::{Self, Balance};
     use sui::table::{Self, Table};
+    use sui::clock::{Clock};
 
     // Struct of a Bet
     public struct Bet has key, store{
@@ -20,9 +21,10 @@ module nebula::bet{
     public fun create_bet(
         amountSuiPerUser: u64,
         duration: u64,
+        clock: &Clock,
         ctx: &mut TxContext
     ){
-        let createdAt = tx_context::epoch_timestamp_ms(ctx);
+        let createdAt = clock.timestamp_ms();
         let endsAt = createdAt + duration;
         transfer::share_object(Bet {
             id: object::new(ctx),
@@ -46,8 +48,8 @@ module nebula::bet{
         bet.funds.withdraw_all()
     }
 
-    public fun increase_timer_fifteen_min(bet: &mut Bet, ctx: &mut TxContext){
-        let current_time = tx_context::epoch_timestamp_ms(ctx);
+    public fun increase_timer_fifteen_min(bet: &mut Bet, clock: &Clock){
+        let current_time = clock.timestamp_ms();
         let new_expire = current_time + 900000; // We add 900000 ms to the current time (15 min).
         bet.endsAt = new_expire;
     }
@@ -74,9 +76,10 @@ module nebula::bet{
         bet.guessPerAddress.contains(sender)
     }
 
-    public fun check_bet_expired(bet: &Bet, ctx: &mut TxContext): bool{
+    public fun check_bet_expired(bet: &Bet, clock: &Clock): bool{
         let (_, _, ends_at,_) = get_bet_stats(bet);
-        if(ends_at > tx_context::epoch_timestamp_ms(ctx)){
+        let currentTime = clock.timestamp_ms();
+        if(ends_at > currentTime){
             return false
         };
         return true

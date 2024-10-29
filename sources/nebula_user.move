@@ -35,9 +35,10 @@ module nebula::user{
 
     public fun withdraw(user: &mut User, ctx: &mut TxContext){
         assert!(user.owner == tx_context::sender(ctx));
+        let sender = tx_context::sender(ctx);
         let user_balance = user.balance.withdraw_all();
         let balance_into_sui = user_balance.into_coin(ctx);
-        transfer::public_transfer(balance_into_sui, tx_context::sender(ctx))
+        transfer::public_transfer(balance_into_sui, sender);
     }
 
     public fun split_balance(user: &mut User, amount: u64): Balance<SUI>{
