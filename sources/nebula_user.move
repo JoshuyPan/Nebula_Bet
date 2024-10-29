@@ -1,10 +1,10 @@
 module nebula::user{
 
-    use std::string::{Self, String};
+    use std::string::{String};
 
     use sui::balance::{Self, Balance};
     use sui::coin::{Self, Coin};
-    use sui::sui::{Self, SUI};
+    use sui::sui::{SUI};
 
     // Struct for the users
     public struct User has key, store{

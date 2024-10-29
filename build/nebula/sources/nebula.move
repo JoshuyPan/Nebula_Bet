@@ -1,7 +1,5 @@
 module nebula::nebula{
 
-    use std::string::{Self, String};
-
     use sui::table::{Self, Table};
     use sui::sui::{SUI};
     use sui::balance::{Self, Balance};
@@ -13,6 +11,7 @@ module nebula::nebula{
     const E_ALREADY_REGISTRED: u64 = 101; 
     const E_NOT_ENOUGH_SUI: u64 = 102;
     const E_ALREADY_GUESSED: u64 = 103;
+    const E_BET_NOT_EXPIRED_YET: u64 = 105;
 
     // My Security Checker
     public struct NebulaPolice has key {
@@ -24,6 +23,8 @@ module nebula::nebula{
 
     // Only who has the nebula admin can withdraw the funds of the Nebula Dapp.
     public struct NebulaAdmin has key {id: UID}
+    // For randon number
+    public struct Random_number has key {id: UID}
     
     fun init(ctx: &mut TxContext) {
         // Transfer the Nebula Police to the owner of the Bet DAPP
@@ -86,7 +87,7 @@ module nebula::nebula{
     ){
         // We grab the needed fields:
         let (user_owner, _, _, _, user_balance) = user.get_user_stats();
-        let (amount_to_partecipate, _,_) = bet.get_bet_stats();
+        let (amount_to_partecipate, _,_,_) = bet.get_bet_stats();
 
         // First of all, we want to check that the user is not already inside the bet.
         let already_guessed = bet.user_already_in(user_owner);
@@ -100,6 +101,63 @@ module nebula::nebula{
             let balance_to_take = user.split_balance(amount_to_partecipate);
             bet.pay_and_entry(balance_to_take, guess, user_owner);
         }
+    }
+
+    public entry fun pick_winner(
+        bet: &mut Bet,
+        ctx: &mut TxContext
+    ){
+        // First of all we check if the bet is expired or in course
+        let is_bet_expired = bet.check_bet_expired(ctx);
+        if(is_bet_expired){
+            // If so, we generate the casual number they should guess
+            let number_to_guess = generate_random_number_in_range_ten(ctx);
+            // Helper to check if someone did the right choice
+            let mut someone_got_the_exact_number: bool = false;
+            // Self explanatory
+            let number_of_partecipants = bet.get_partecipants_length();
+            let mut i = 0;
+
+            while(number_of_partecipants < i){
+                let current_address = bet.get_address_partecipant(i);
+                // We READ the current address guess
+                let guess = bet.get_guess_per_address(current_address);
+                if (guess == number_to_guess){
+                    someone_got_the_exact_number = true;
+                    let balance = bet.withdraw_balance();
+                    let sui_coin = balance.into_coin(ctx);
+                    transfer::public_transfer(sui_coin, current_address);
+                    break
+                };
+                i = i + 1;
+            };
+            // Here is the "funny" part, if no one got the exact number, we revert and we add 15 min of waiting time,
+            // so other users can join the bet again, and the funds grows and grows util someone guesses the right number.
+            if (someone_got_the_exact_number == false){
+                bet.increase_timer_fifteen_min(ctx);
+                return
+            }
+        }else {
+            abort(E_BET_NOT_EXPIRED_YET)
+        }
+    }
+
+
+    // ========= PRIVATE FUNCTIONS ======
+
+    fun generate_random_number_in_range_ten(ctx: &mut TxContext): u64 {
+        let new_id = object::new(ctx);
+        let id_to_bytes = object::uid_to_bytes(&new_id);
+        let bytes = id_to_bytes[0] as u64;
+        let number  = bytes % 10;
+        let random_number = Random_number {
+            id: new_id
+        };
+        let Random_number {
+            id
+        } = random_number ;
+        object::delete(id);
+        number
     }
 }
 
