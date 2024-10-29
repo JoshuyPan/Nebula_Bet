@@ -24,7 +24,7 @@ module nebula::bet{
     public struct BetAdmin has key {id: UID}
 
     // ======== PUBLIC FUNCTIONS =========
-    public entry fun create_bet(
+    public fun create_bet(
         user: &mut User,
         condition: String,
         amountSuiPerUser: u64,
