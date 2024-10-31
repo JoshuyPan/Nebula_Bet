@@ -4,7 +4,7 @@ import { loadBet } from './functions/bet_create';
 import DropTab from './functions/dropdown';
 
 import {Button} from "react-bootstrap"
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react';
 //sui stuff
 import { Transaction } from '@mysten/sui/transactions';
@@ -18,7 +18,10 @@ import {
 import { toBase64 } from '@mysten/sui/utils';
 
 function App() {
+  const networkConnected = useSelector((state) => state.betting.bettingPackage);
+
   const currentAccount = useCurrentAccount();
+  const[account, setAccount] = useState(null);
 	const [open, setOpen] = useState(false);
   const dispatch = useDispatch()
 
@@ -28,10 +31,20 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
+        {currentAccount? (
+          <>
       <DropTab/> <hr />
-      <ConnectButton className='Connect' />
-        
+      {networkConnected ? (
         <Button onClick={connect}> bet</Button>
+        ) : (
+        <Button disabled>Please Connect a package</Button>
+        )}
+      </>
+        ):(
+          <>
+      <ConnectButton /> <hr></hr>
+      </>
+        )}        
       </header>
     </div>
   );
