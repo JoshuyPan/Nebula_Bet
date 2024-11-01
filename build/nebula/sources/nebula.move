@@ -38,7 +38,7 @@ module nebula::nebula{
             balance: balance::zero()
         });
 
-        // Same for the Admin Capability
+        // Same for the Admin Capability //The publisher gets admin
         transfer::transfer(NebulaAdmin{
             id: object::new(ctx)
         }, tx_context::sender(ctx))
@@ -181,6 +181,25 @@ module nebula::nebula{
         } = random_number ;
         object::delete(id);
         number
+    }
+    #[test]
+    public fun test_get_admin_has_no_access_control() {
+        let random_address = @0xCAFE;
+        let mut ctx = tx_context::dummy();
+        let mut police = NebulaPolice{
+            id: object::new(&mut ctx),
+            addressIsRegistred: table::new(&mut ctx),
+            newBetFee: 1 * 1000000000,
+            balance: balance::zero()
+        };
+        let admin =  NebulaAdmin{
+            id: object::new(&mut ctx)
+        };
+        give_admin_capability(&admin, random_address, &mut ctx );
+
+        transfer::share_object(police);
+        transfer::share_object(admin);
+
     }
 }
 
