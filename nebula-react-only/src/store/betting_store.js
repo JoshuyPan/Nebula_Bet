@@ -4,7 +4,7 @@ export const betting = createSlice({
     name: 'betting',
     initialState: {
         client: [],
-        network: null,
+        network: "testnet",
         account: null,
         bettingPackage: null,
         bettingPolice: null,

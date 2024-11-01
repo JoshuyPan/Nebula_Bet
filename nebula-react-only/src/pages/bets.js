@@ -12,7 +12,7 @@ import { loadBet, loadRegister } from '../functions/bet_create';
 
 const Bets = () => {
   const tx = new Transaction();
-  const wallet = useCurrentAccount();
+
   const [show, setShow] = useState(true);
   const [digest, setDigest] = useState('');
   const [transactionComplete, setTransactionComplete] = useState(false);
@@ -20,6 +20,7 @@ const Bets = () => {
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   const dispatch = useDispatch();
+  const network = useSelector((state) => state.betting.network)
   const walletConnected = useSelector((state) => state.betting.bettingPackage);
   const packageId = useSelector((state) => state.betting.bettingPackage);
   const nebulaPolice = useSelector((state) => state.betting.bettingPolice)
@@ -32,6 +33,8 @@ const Bets = () => {
       const bcsDuration = bcs.u64().serialize(duration).toBytes();
         try{
           console.log("attempting bet")
+          setTransactionComplete(false)
+        setTransactionFailed(false)
           tx.moveCall({
             package: `${packageId}`,
             module: "bet",
@@ -39,10 +42,9 @@ const Bets = () => {
             arguments: [tx.pure(bcsAmount, "u64"), tx.pure(bcsDuration, "u64"), tx.object(SUI_CLOCK_OBJECT_ID)], 
             typeArguments: []
           });
-          console.log("movecall completed")
           const response = signAndExecuteTransaction({
             transaction: tx,
-            chain: 'sui:devnet',
+            chain: `sui:${network}`,
           },
           {
             onSuccess: (response) => {
@@ -50,10 +52,12 @@ const Bets = () => {
               setDigest(response.digest);
               setTransactionComplete(true);
             },
-          },)
-        } catch (error) {
-          console.error("Error during bet transaction:", error);
-          window.alert("Transaction failed.");
+          }, console.log("comepleted bet"))
+          setTransactionComplete(true);
+
+        } catch {
+          console.log("caught")
+          setTransactionFailed(true);
         }
         }
       
@@ -70,7 +74,7 @@ const Bets = () => {
           });
           const response = signAndExecuteTransaction({
             transaction: tx,
-            chain: 'sui:devnet',
+            chain: `sui:${network}`,
           },
           {
             onSuccess: (response) => {

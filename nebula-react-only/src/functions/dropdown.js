@@ -1,54 +1,48 @@
-import { React, useState } from 'react';
+import React, { useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
-import { loadPackagesDevnet, loadPackagesMainnet} from "./package_select"
+import { loadPackagesDevnet, loadPackagesMainnet, loadPackagesTestnet } from "./package_select";
 
 const DropTab = () => {
-    const dispatch = useDispatch()
-    const[devnet, setDevnet] = useState(false);
+    const dispatch = useDispatch();
+    const [selectedNetwork, setSelectedNetwork] = useState(null);
 
-    const[packageSelected, setPackageSelected] = useState(false);
     const selectDevnet = async () => {
-        const devnet = await loadPackagesDevnet(dispatch);
-        console.log(devnet)
-
-        setDevnet(true);
-        setPackageSelected(true)
+        await loadPackagesDevnet(dispatch);
+        setSelectedNetwork('devnet');
     };
 
     const selectMainnet = async () => {
-        const mainnet = await loadPackagesMainnet(dispatch);
-        console.log(mainnet)
-        
-        setDevnet(false);
-        setPackageSelected(true)
+        await loadPackagesMainnet(dispatch);
+        setSelectedNetwork('mainnet');
+    };
 
+    const selectTestnet = async () => {
+        // Adjust this to use a proper testnet loading function if available
+        await loadPackagesTestnet(dispatch);
+        setSelectedNetwork('testnet');
+    };
 
+    const renderToggleText = () => {
+        if (!selectedNetwork) {
+            return "Choose your package";
+        }
+        return `${selectedNetwork.charAt(0).toUpperCase() + selectedNetwork.slice(1)} Package Selected`;
     };
 
     return (
         <Dropdown>
-            {!packageSelected ? (
-                <Dropdown.Toggle variant="success" id="dropdown-basic">
-                Choose your package
+            <Dropdown.Toggle variant="success" id="dropdown-basic">
+                {renderToggleText()}
             </Dropdown.Toggle>
-            ) : (<>{ devnet? (
-                <Dropdown.Toggle variant="success" id="dropdown-basic">
-                Devnet Package Selected
-            </Dropdown.Toggle>
-                ):(
-                    <Dropdown.Toggle variant="success" id="dropdown-basic">
-                Mainnet Package Selected
-            </Dropdown.Toggle>
-                )}</>
-            )}
 
             <Dropdown.Menu>
                 <Dropdown.Item onClick={selectDevnet}>- Devnet Package</Dropdown.Item>
                 <Dropdown.Item onClick={selectMainnet}>- Mainnet Package</Dropdown.Item>
+                <Dropdown.Item onClick={selectTestnet}>- Testnet Package</Dropdown.Item>
             </Dropdown.Menu>
         </Dropdown>
     );
-}
+};
 
 export default DropTab;
