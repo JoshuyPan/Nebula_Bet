@@ -4,6 +4,7 @@ export const betting = createSlice({
     name: 'betting',
     initialState: {
         client: [],
+        network: null,
         account: null,
         bettingPackage: null,
         bettingPolice: null,
@@ -12,6 +13,9 @@ export const betting = createSlice({
     reducers: {
         setClient: (state, action) => {
             state.client = action.payload
+        },
+        setNetwork: (state, action) => {
+            state.network = action.payload
         },
         setAccount: (state, action) => {
             state.account = action.payload
@@ -29,6 +33,7 @@ export const betting = createSlice({
     }
 })
 
-export const { setPackage, setBet, setAccount, setClient, setNebulaPolice } = betting.actions;
+export const { setPackage, setBet, setAccount, 
+    setNetwork, setClient, setNebulaPolice } = betting.actions;
 
 export default betting.reducer;

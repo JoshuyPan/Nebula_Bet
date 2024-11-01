@@ -5,14 +5,14 @@ compiled_package_info:
     nebula: "0000000000000000000000000000000000000000000000000000000000000000"
     std: "0000000000000000000000000000000000000000000000000000000000000001"
     sui: "0000000000000000000000000000000000000000000000000000000000000002"
-  source_digest: 45A40EB753F4DD69E7E9A61FE74F04720D8C5549699F040D0896A46CB796275F
+  source_digest: C3D4E6186FDD7F1120C29FF1772FDCE06DA59680869C800B962442808989FB76
   build_flags:
-    dev_mode: false
-    test_mode: false
+    dev_mode: true
+    test_mode: true
     generate_docs: false
     install_dir: ~
     force_recompilation: false
-    lock_file: "./Move.lock"
+    lock_file: ~
     fetch_deps_only: false
     skip_fetch_latest_git_deps: false
     default_flavor: sui

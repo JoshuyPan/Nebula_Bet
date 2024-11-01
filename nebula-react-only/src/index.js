@@ -18,6 +18,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const { networkConfig } = createNetworkConfig({
 	devnet: { url: getFullnodeUrl('devnet') },
 	mainnet: { url: getFullnodeUrl('mainnet') },
+	testnet: { url: getFullnodeUrl('testnet') },
 });
 const queryClient = new QueryClient();
 
