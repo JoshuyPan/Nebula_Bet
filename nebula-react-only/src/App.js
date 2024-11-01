@@ -13,15 +13,23 @@ import {
 	useCurrentAccount,
 	useSignTransaction,
   ConnectModal,
-  useAccounts
+  useAccounts,
 } from '@mysten/dapp-kit';
+import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
 
 import { toBase64 } from '@mysten/sui/utils';
-import { loadAccount } from './functions/account';
+import { loadAccount, loadClient } from './functions/account';
 
 
 function App() {
+  const tx = new Transaction();
 	const currentAccount = useCurrentAccount();
+  const devnetRPC = getFullnodeUrl('devnet');
+  const mainnetRPC = getFullnodeUrl('mainnet');
+
+  const mainnetClient = new SuiClient({ url: mainnetRPC });
+  const devnetClient = new SuiClient({ url: devnetRPC });
+
   const accounts = useAccounts();
 	const [account, setAccount] = useState(null);
 	const dispatch = useDispatch();
@@ -30,8 +38,12 @@ function App() {
 	useEffect(() => {
 		const fetchAccount = async () => {
 			if (currentAccount) {
+        // client setup
+        await loadClient(devnetClient, dispatch)
+        //account setup
         const account = accounts[0]
         await loadAccount(account, dispatch)
+        setAccount(account.address.toString())
 				// Add any additional actions here
 			}
 		};
@@ -45,6 +57,7 @@ function App() {
 					<>
 						<DropTab /> <hr />
 						<Bets />
+            <p>your address: {account}</p>
             
 					</>
 				) : (
