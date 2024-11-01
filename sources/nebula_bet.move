@@ -4,6 +4,7 @@ module nebula::bet{
     use sui::balance::{Self, Balance};
     use sui::table::{Self, Table};
     use sui::clock::{Clock};
+    
 
     // Struct of a Bet
     public struct Bet has key, store{
@@ -83,6 +84,17 @@ module nebula::bet{
             return false
         };
         return true
+    }
+    #[test]
+    public fun create_bet_without_needing_user() {
+        let mut ctx = tx_context::dummy();
+        let amountSuiPerUser: u64 = 1;
+        let duration = 60000;
+        let clock = sui::clock::create_for_testing(&mut ctx);
+
+        create_bet(amountSuiPerUser, duration, &clock, &mut ctx);
+
+        sui::clock::destroy_for_testing(clock);
     }
 
 }

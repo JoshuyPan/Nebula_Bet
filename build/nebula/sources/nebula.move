@@ -48,7 +48,7 @@ module nebula::nebula{
     public entry fun register(police: &mut NebulaPolice, ctx: &mut TxContext){
         let sender = tx_context::sender(ctx);
         // Check if the address is in the table
-        let registred = police.addressIsRegistred.contains(sender);
+        let registred = police.addressIsRegistred.contains(sender); 
         // If so revert
         if(registred){
             abort(E_ALREADY_REGISTRED)
@@ -106,6 +106,7 @@ module nebula::nebula{
             bet.pay_and_entry(balance_to_take, guess, user_owner);
         }
     }
+
 
     public entry fun pick_winner(
         bet: &mut Bet,

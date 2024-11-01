@@ -1,0 +1,10 @@
+import React from 'react'
+
+export const DEVNET_PACKAGE = "0x8461793422a28e6c16f3ed76bc0116bdce5d49c15e628f6a627506ba204a757b"
+export const DEVNET_NEBULA_POLICE= "0x2bbffaea25ab5014d12888553e5ff683999e7f0af497dd3dabbfa64557a00d4d"
+export const MAINNET_PACKAGE = "mainnetPackageId"
+export const MAINNET_NEBULA_POLICE= "mainnetNebulaPolice"
+export const TESTNET_PACKAGE = "0x63dfacc13571916691ca9513e11de016e4f6b53622434930a601c446996ebb71"
+export const TESTNET_NEBULA_POLICE= "0xb51f160b436fa7a0b1d09aad8a077e76605664922b9f67d503656fe848154251"
+
+
