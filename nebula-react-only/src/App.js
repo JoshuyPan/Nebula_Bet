@@ -2,6 +2,7 @@ import './App.css';
 
 import DropTab from './functions/dropdown';
 import Bets from './pages/bets';
+import Zombie_run from "./pages/zombie_run_page"
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
@@ -54,7 +55,8 @@ function App() {
                 {currentAccount ? (
                     <>
                         <DropTab /> <hr />
-                        <Bets />
+                        <Bets /> <br />
+                        <Zombie_run />
                         <p>your address: {account}</p>
                     </>
                 ) : (

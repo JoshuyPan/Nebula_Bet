@@ -45,6 +45,7 @@ module nebula::zombie_run{
     public fun play_zombie_run(distance: u64, bet_amount: u64, coin: &mut Coin<SUI>, 
     zombie_pool: &mut Zombie_pool, ctx: &mut TxContext) 
     {
+        // TODO make a check to ensure tat the distance is not passed the required amount which should be within a 100.
         let balance = value(coin);
         if(balance < bet_amount + ZOMBIE_PLAY_FEE) {
             abort(INSUFFICIENT_FUNDS)
