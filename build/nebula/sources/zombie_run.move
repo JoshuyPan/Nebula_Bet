@@ -3,7 +3,8 @@ module nebula::zombie_run{
     use sui::balance::{Self, Balance};
     use sui::sui::{SUI};
     use sui::coin::{value, Coin, split, Self};
-    use nebula::nebula::{generate_random_number_in_range_100};
+    use nebula::nebula::{generate_random_number_in_range_100,
+    generate_random_number_with_random_number};
 
     // fee constants
     const ZOMBIE_PLAY_FEE: u64 = 100000000; // 0.1 sui token
@@ -56,12 +57,26 @@ module nebula::zombie_run{
 
         transfer::public_transfer(fee_amount, deployer);
         // game logic
-        let mut random_number = generate_random_number_in_range_100(ctx);
+        let mut inital_random_number_one = generate_random_number_in_range_100(ctx);
+        let mut final_random_number_one = generate_random_number_with_random_number(inital_random_number_one, ctx);
+
+        let mut inital_random_number_two = generate_random_number_in_range_100(ctx);
+        let mut final_random_number_two = generate_random_number_with_random_number(inital_random_number_two, ctx);
+
+        let mut final_random_number = final_random_number_two + final_random_number_one /2;
         /// below is not tested //TODO
-        let mut pool_has_enough = calculate_pool_has_enough_for_win(random_number, bet_amount, zombie_pool);
-        while(pool_has_enough) {
-            random_number = generate_random_number_in_range_100(ctx);
-            pool_has_enough = calculate_pool_has_enough_for_win(random_number, bet_amount, zombie_pool);
+        
+        /// perhaps, we should make it so we call multiple random numbers to increase the risk,
+        /// we should have a random number be called 4 times and those 4 numbers should be * to eachother and then divided by 4? 
+        let mut pool_has_enough = calculate_pool_has_enough_for_win(final_random_number, bet_amount, zombie_pool);
+
+        while(pool_has_enough == false) { // while it is false, it will re run.
+            inital_random_number_one = generate_random_number_in_range_100(ctx);
+            final_random_number_one = generate_random_number_with_random_number(inital_random_number_one, ctx);
+            inital_random_number_two = generate_random_number_in_range_100(ctx);
+            final_random_number_two = generate_random_number_with_random_number(inital_random_number_two, ctx);
+            final_random_number = final_random_number_two + final_random_number_one /2;
+            pool_has_enough = calculate_pool_has_enough_for_win(final_random_number, bet_amount, zombie_pool);
         }
         /// up until this point, we are only doing checks to see if the user wins, will he have enough, and if not
         /// we call a new number to ensur if they win, we do have enough to pay them out. 

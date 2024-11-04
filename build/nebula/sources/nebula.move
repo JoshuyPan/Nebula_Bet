@@ -197,11 +197,25 @@ module nebula::nebula{
         object::delete(id);
         number
     }
+    public fun generate_random_number_with_random_number(number: u64, ctx: &mut TxContext): u64 {
+        let new_id = object::new(ctx);
+        let id_to_bytes = object::uid_to_bytes(&new_id);
+        let bytes = id_to_bytes[0] as u64;
+        let number  = bytes % number;
+        let random_number = Random_number {
+            id: new_id
+        };
+        let Random_number {
+            id
+        } = random_number ;
+        object::delete(id);
+        number
+    }
     #[test]
     public fun test_get_admin_has_no_access_control() {
         let random_address = @0xCAFE;
         let mut ctx = tx_context::dummy();
-        let mut police = NebulaPolice{
+        let mut _police = NebulaPolice{
             id: object::new(&mut ctx),
             addressIsRegistred: table::new(&mut ctx),
             newBetFee: 1 * 1000000000,
@@ -212,7 +226,7 @@ module nebula::nebula{
         };
         give_admin_capability(&admin, random_address, &mut ctx );
 
-        transfer::share_object(police);
+        transfer::share_object(_police);
         transfer::share_object(admin);
 
     }
