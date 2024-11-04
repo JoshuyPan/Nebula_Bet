@@ -24,6 +24,7 @@ module nebula::zombie_run{
     public struct Zombie_pool has key, store { 
         id: UID,
         pool_balanace: Balance<SUI>,
+        fee_pool: Balance<SUI>,
         devs_wallet: address
         // may need more information for setting and determining winners.
     }
@@ -33,6 +34,7 @@ module nebula::zombie_run{
         let zombie_pool = Zombie_pool {
             id: object::new(ctx),
             pool_balanace: balance::zero(),
+            fee_pool: balance::zero(),
             devs_wallet: deployer,
 
         }; // should this be public?
@@ -43,7 +45,6 @@ module nebula::zombie_run{
     public fun play_zombie_run(distance: u64, bet_amount: u64, coin: &mut Coin<SUI>, 
     zombie_pool: &mut Zombie_pool, ctx: &mut TxContext) 
     {
-        let player = tx_context::sender(ctx);
         let balance = value(coin);
         if(balance < bet_amount + ZOMBIE_PLAY_FEE) {
             abort(INSUFFICIENT_FUNDS)
@@ -51,15 +52,12 @@ module nebula::zombie_run{
         let transaction_amount = split(coin, bet_amount, ctx);
         let fee_amount = split(coin, ZOMBIE_PLAY_FEE, ctx);
 
+        let fee_amount_into_balance = coin::into_balance(fee_amount);
+        zombie_pool.fee_pool.join(fee_amount_into_balance);
         let transaction_into_balance = coin::into_balance(transaction_amount);
         zombie_pool.pool_balanace.join(transaction_into_balance);
         
-        
-        let deployer = zombie_pool.devs_wallet;
 
-
-        transfer::public_transfer(fee_amount, deployer);
-        
 
         // game logic
         let mut final_random_number = generate_final_random_number(ctx);
@@ -76,14 +74,10 @@ module nebula::zombie_run{
             let winnings = zombie_pool.pool_balanace.split(_winnings_amount);
             let winnings_into_coins = winnings.into_coin(ctx);
             coin.join(winnings_into_coins);
-
         }
         /// up until this point, we are only doing checks to see if the user wins, will he have enough, and if not
         /// we call a new number to ensur if they win, we do have enough to pay them out. 
         /// its fairness with expectation...
-
-        //TODO check if the user won and then convert balance to coins and transfer winnings.
-        // we should also do a smaller fee for the user to receive the money. 
 
     }
 
@@ -112,4 +106,6 @@ module nebula::zombie_run{
         };
         return false
     }
+
+    //TODO , need to create a function for the developers can withdraw their tokens from the fee_pool.
 }
