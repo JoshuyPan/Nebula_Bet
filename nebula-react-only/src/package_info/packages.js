@@ -1,7 +1,9 @@
 import React from 'react'
 
-export const DEVNET_PACKAGE = "0x8461793422a28e6c16f3ed76bc0116bdce5d49c15e628f6a627506ba204a757b"
+
+export const DEVNET_PACKAGE = "0xfa7f5d2f423ac4b4f0b805ef77836438aa62bea2d29a7946a894545054452d9c"
 export const DEVNET_NEBULA_POLICE= "0x2bbffaea25ab5014d12888553e5ff683999e7f0af497dd3dabbfa64557a00d4d"
+export const DEVNET_ZOMBIE_POOL = "0x7b4bcf8da06ab435cb551b86f77f6ec7f5223ff3c5d5c9b15ebb81edb806cc47"
 export const MAINNET_PACKAGE = "mainnetPackageId"
 export const MAINNET_NEBULA_POLICE= "mainnetNebulaPolice"
 export const TESTNET_PACKAGE = "0x63dfacc13571916691ca9513e11de016e4f6b53622434930a601c446996ebb71"

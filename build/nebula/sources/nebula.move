@@ -38,7 +38,7 @@ module nebula::nebula{
             balance: balance::zero()
         });
 
-        // Same for the Admin Capability
+        // Same for the Admin Capability //The publisher gets admin
         transfer::transfer(NebulaAdmin{
             id: object::new(ctx)
         }, tx_context::sender(ctx))
@@ -132,7 +132,7 @@ module nebula::nebula{
                     someone_got_the_exact_number = true;
                     let balance = bet.withdraw_balance();
                     let sui_coin = balance.into_coin(ctx);
-                    transfer::public_transfer(sui_coin, current_address);
+                    transfer::public_transfer(sui_coin, current_address); /// this is creating a new coin object. 
                     break
                 };
                 i = i + 1;
@@ -153,7 +153,7 @@ module nebula::nebula{
 
     /// Function to add another Admin 
     public entry fun give_admin_capability(_: &NebulaAdmin, newAdmin: address, ctx: &mut TxContext){
-        transfer::transfer( NebulaAdmin{
+        transfer::transfer( NebulaAdmin{ // no access control so anyone can call this function.
             id: object::new(ctx)
         }, newAdmin)
     }
@@ -162,7 +162,7 @@ module nebula::nebula{
         let sender = tx_context::sender(ctx);
         let nebula_balance = police.balance.withdraw_all();
         let into_sui = nebula_balance.into_coin(ctx);
-        transfer::public_transfer(into_sui, sender);
+        transfer::public_transfer(into_sui, sender); /// this is creating a new coin object. 
     }
 
 
@@ -181,6 +181,54 @@ module nebula::nebula{
         } = random_number ;
         object::delete(id);
         number
+    }
+
+    public fun generate_random_number_in_range_100(ctx: &mut TxContext): u64 {
+        let new_id = object::new(ctx);
+        let id_to_bytes = object::uid_to_bytes(&new_id);
+        let bytes = id_to_bytes[0] as u64;
+        let number  = bytes % 1000;
+        let random_number = Random_number {
+            id: new_id
+        };
+        let Random_number {
+            id
+        } = random_number ;
+        object::delete(id);
+        number
+    }
+    public fun generate_random_number_with_random_number(number: u64, ctx: &mut TxContext): u64 {
+        let new_id = object::new(ctx);
+        let id_to_bytes = object::uid_to_bytes(&new_id);
+        let bytes = id_to_bytes[0] as u64;
+        let number  = bytes % number;
+        let random_number = Random_number {
+            id: new_id
+        };
+        let Random_number {
+            id
+        } = random_number ;
+        object::delete(id);
+        number
+    }
+    #[test]
+    public fun test_get_admin_has_no_access_control() {
+        let random_address = @0xCAFE;
+        let mut ctx = tx_context::dummy();
+        let mut _police = NebulaPolice{
+            id: object::new(&mut ctx),
+            addressIsRegistred: table::new(&mut ctx),
+            newBetFee: 1 * 1000000000,
+            balance: balance::zero()
+        };
+        let admin =  NebulaAdmin{
+            id: object::new(&mut ctx)
+        };
+        give_admin_capability(&admin, random_address, &mut ctx );
+
+        transfer::share_object(_police);
+        transfer::share_object(admin);
+
     }
 }
 
