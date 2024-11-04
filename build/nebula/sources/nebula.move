@@ -132,7 +132,7 @@ module nebula::nebula{
                     someone_got_the_exact_number = true;
                     let balance = bet.withdraw_balance();
                     let sui_coin = balance.into_coin(ctx);
-                    transfer::public_transfer(sui_coin, current_address);
+                    transfer::public_transfer(sui_coin, current_address); /// this is creating a new coin object. 
                     break
                 };
                 i = i + 1;
@@ -162,7 +162,7 @@ module nebula::nebula{
         let sender = tx_context::sender(ctx);
         let nebula_balance = police.balance.withdraw_all();
         let into_sui = nebula_balance.into_coin(ctx);
-        transfer::public_transfer(into_sui, sender);
+        transfer::public_transfer(into_sui, sender); /// this is creating a new coin object. 
     }
 
 
