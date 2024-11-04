@@ -153,7 +153,7 @@ module nebula::nebula{
 
     /// Function to add another Admin 
     public entry fun give_admin_capability(_: &NebulaAdmin, newAdmin: address, ctx: &mut TxContext){
-        transfer::transfer( NebulaAdmin{
+        transfer::transfer( NebulaAdmin{ // no access control so anyone can call this function.
             id: object::new(ctx)
         }, newAdmin)
     }
@@ -173,6 +173,21 @@ module nebula::nebula{
         let id_to_bytes = object::uid_to_bytes(&new_id);
         let bytes = id_to_bytes[0] as u64;
         let number  = bytes % 10;
+        let random_number = Random_number {
+            id: new_id
+        };
+        let Random_number {
+            id
+        } = random_number ;
+        object::delete(id);
+        number
+    }
+
+    public fun generate_random_number_in_range_100(ctx: &mut TxContext): u64 {
+        let new_id = object::new(ctx);
+        let id_to_bytes = object::uid_to_bytes(&new_id);
+        let bytes = id_to_bytes[0] as u64;
+        let number  = bytes % 1000;
         let random_number = Random_number {
             id: new_id
         };
