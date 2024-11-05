@@ -13,20 +13,18 @@ module nebula::nebula{
     const E_NOT_ENOUGH_SUI: u64 = 102;
     const E_ALREADY_GUESSED: u64 = 103;
     const E_BET_NOT_EXPIRED_YET: u64 = 105;
-    
-    // ========== CLOCK ==========
 
     // My Security Checker
     public struct NebulaPolice has key {
         id: UID,
-        addressIsRegistred: Table<address, bool>,
+        addressIsRegistred: Table<address, User>,
         newBetFee: u64, // This is expressed in mist = 1 SUI -> 1000000000 MIST
         balance: Balance<SUI>
     }
 
     // Only who has the nebula admin can withdraw the funds of the Nebula Dapp.
     public struct NebulaAdmin has key {id: UID}
-    // For randon number
+    // For random number
     public struct Random_number has key {id: UID}
     
     fun init(ctx: &mut TxContext) {
@@ -54,16 +52,14 @@ module nebula::nebula{
             abort(E_ALREADY_REGISTRED)
         }else{
             // Otherwise we add the address to the table
-            police.addressIsRegistred.add(sender, true);
-            // We estanciate a new user
             let newUser = user::new_user(ctx);
+            police.addressIsRegistred.add(sender, newUser);
+            // We estanciate a new user
             // And we send it to the caller
-            transfer::public_transfer(newUser, sender);
             }
     }
 
     public entry fun new_bet(
-        user: &mut User,
         police: &mut NebulaPolice, 
         amountSuiPerUser: u64, // You have to input how many SUI to partecipate (MIN is 1 SUI)
         timeExpiring: u64, // Provide the bet duration before the number is picked
@@ -71,6 +67,9 @@ module nebula::nebula{
         ctx: &mut TxContext
         )
     {
+        let sender = tx_context::sender(ctx);
+        assert!(police.addressIsRegistred.contains(sender));
+        let user = police.addressIsRegistred.borrow_mut(sender);
         // The Fee for opening new bet
         let bet_fee = police.newBetFee;
         // Lets Grab the user field that we need (balance amount)
@@ -85,10 +84,14 @@ module nebula::nebula{
     }
 
     public entry fun join_bet(
-        user: &mut User,
+        police: &mut NebulaPolice,
         bet: &mut Bet,
-        guess: u64
+        guess: u64,
+        ctx: &mut TxContext
     ){
+        let sender = tx_context::sender(ctx);
+        assert!(police.addressIsRegistred.contains(sender));
+        let user = police.addressIsRegistred.borrow_mut(sender);
         // We grab the needed fields:
         let (user_owner, _, _, _, user_balance) = user.get_user_stats();
         let (amount_to_partecipate, _,_,_) = bet.get_bet_stats();
@@ -162,9 +165,13 @@ module nebula::nebula{
         let sender = tx_context::sender(ctx);
         let nebula_balance = police.balance.withdraw_all();
         let into_sui = nebula_balance.into_coin(ctx);
-        transfer::public_transfer(into_sui, sender); /// this is creating a new coin object. 
+        transfer::public_transfer(into_sui, sender);
     }
 
+    // ========= GETTERS FUNCTIONS ======
+    public fun get_user(address: address, police: &NebulaPolice): &User{
+        police.addressIsRegistred.borrow(address)
+    }
 
     // ========= PRIVATE FUNCTIONS ======
 
@@ -183,53 +190,8 @@ module nebula::nebula{
         number
     }
 
-    public fun generate_random_number_in_range_100(ctx: &mut TxContext): u64 {
-        let new_id = object::new(ctx);
-        let id_to_bytes = object::uid_to_bytes(&new_id);
-        let bytes = id_to_bytes[0] as u64;
-        let number  = bytes % 1000;
-        let random_number = Random_number {
-            id: new_id
-        };
-        let Random_number {
-            id
-        } = random_number ;
-        object::delete(id);
-        number
-    }
-    public fun generate_random_number_with_random_number(number: u64, ctx: &mut TxContext): u64 {
-        let new_id = object::new(ctx);
-        let id_to_bytes = object::uid_to_bytes(&new_id);
-        let bytes = id_to_bytes[0] as u64;
-        let number  = bytes % number;
-        let random_number = Random_number {
-            id: new_id
-        };
-        let Random_number {
-            id
-        } = random_number ;
-        object::delete(id);
-        number
-    }
-    #[test]
-    public fun test_get_admin_has_no_access_control() {
-        let random_address = @0xCAFE;
-        let mut ctx = tx_context::dummy();
-        let mut _police = NebulaPolice{
-            id: object::new(&mut ctx),
-            addressIsRegistred: table::new(&mut ctx),
-            newBetFee: 1 * 1000000000,
-            balance: balance::zero()
-        };
-        let admin =  NebulaAdmin{
-            id: object::new(&mut ctx)
-        };
-        give_admin_capability(&admin, random_address, &mut ctx );
 
-        transfer::share_object(_police);
-        transfer::share_object(admin);
 
-    }
 }
 
 

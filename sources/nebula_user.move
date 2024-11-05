@@ -49,4 +49,5 @@ module nebula::user{
     public fun get_user_stats(user: &User): (address, u64, u64, String, u64){
         (user.owner, user.betWin, user.betLost, user.grade, balance::value(&user.balance))
     }
+
 }
