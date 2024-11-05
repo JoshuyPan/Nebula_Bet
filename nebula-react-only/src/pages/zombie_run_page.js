@@ -33,9 +33,9 @@ const Zombie_run = () => {
       const play_button = async () => {
         setTransactionComplete(false)
         setTransactionFailed(false)
-        const amount = 100000000;// o.1 sui token
+        const amount = 1000000000;// o.1 sui token
         const bet_amount = bcs.u64().serialize(amount).toBytes();
-        const distance = 20; // one minute in ms
+        const distance = 60; // one minute in ms
         const bet_distance = bcs.u64().serialize(distance).toBytes();
         console.log("account", account);
         const gasBudget = 100000000
@@ -47,7 +47,7 @@ const Zombie_run = () => {
         console.log("coin", coin);
 
         try{
-            tx.setGasBudget(gasBudget);
+            //tx.setGasBudget(gasBudget);
           tx.moveCall({
             package: `${packageId}`,
             module: "zombie_run",

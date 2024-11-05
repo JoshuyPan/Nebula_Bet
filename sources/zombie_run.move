@@ -68,6 +68,7 @@ module nebula::zombie_run{
             final_random_number = generate_final_random_number(ctx);
             pool_has_enough = calculate_pool_has_enough_for_win(final_random_number, bet_amount, zombie_pool);
         };
+        /// this needs to be in another function.
         let mut _winnings_amount = 0;
         let multiplier = distance / 10;
         if (distance <= final_random_number) {
@@ -79,7 +80,6 @@ module nebula::zombie_run{
         /// up until this point, we are only doing checks to see if the user wins, will he have enough, and if not
         /// we call a new number to ensur if they win, we do have enough to pay them out. 
         /// its fairness with expectation...
-
     }
 
     public fun donate_to_zombie_pool_balanace(amount: u64, coin: &mut Coin<SUI>, 
